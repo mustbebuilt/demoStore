@@ -1,0 +1,133 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chrome Webkit Speech Demo</title>
+<style type="text/css">
+body{
+	font-size:24px;
+	font-family:Tahoma, Geneva, sans-serif;	
+}
+#noSpeech, #speechEnabled, #msg, #confidMsg, #respMsg{
+	display:none;	
+}
+#msg, #confidMsg, #respMsg{
+	border:1px solid #030;	
+	width:300px;
+	text-align:center;
+	padding:5px;
+	margin:10px;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
+</script>
+</head>
+<body>
+<div id="container">
+<div id="speechEnabled">
+  <h1>Speak to the Machine</h1>
+</div>
+<div id="noSpeech">
+<p>No speech</p>
+</div>
+<div id="msg">
+<p></p>
+</div>
+<div id="respMsg">
+<p></p>
+</div>
+<div id="confidMsg">
+<p></p>
+</div>
+</div>
+<script>
+
+	
+	window.SpeechRecognition = window.SpeechRecognition       ||
+                                 window.webkitSpeechRecognition ||
+                                 null;
+
+	if (window.SpeechRecognition === null) {	
+		$('#speechEnabled').hide();
+		$('#noSpeech').show(); 
+      } else {
+        var recognizer = new window.SpeechRecognition();
+		
+        recognizer.continuous = true;
+		recognizer.interimResults = true;
+		recognizer.lang = "english";
+        
+   		$('#speechEnabled').show();
+		//$('#msg').show();
+		$('#noSpeech').hide(); 
+		
+		recognizer.start();
+		
+		recognizer.onstart = function() { console.info('start');}
+  		//recognizer.onresult = function(event) { ... }
+  		recognizer.onerror = function(event) {
+			console.info('whooprs');
+			console.dir(event);
+		}
+  		recognizer.onend = function() { console.info('I know its over'); }
+		
+
+  
+   recognizer.onresult = function(event) {
+	   
+	   
+   		//console.dir(event.resultIndex);
+		 for (var i = event.resultIndex; i < event.results.length; i++) {
+			 //console.dir(event.results[i][0].transcript);
+            if (event.results[i].isFinal) {
+			  var displayText = (event.results[i][0].transcript);
+			  displayText = displayText.trim();
+			  $('#msg').show();
+			  $('#confidMsg').show();
+              $('#msg p').text(displayText);
+			  $('#confidMsg p').text('Confidence: ' + event.results[i][0].confidence);
+			  checkName(displayText);
+            } 
+         }
+	}
+	}
+	
+	
+function checkName(myVal){
+		console.info(myVal);
+		switch(myVal){
+			
+		case "let me in" : 
+			$('#respMsg p').text('No');
+			$('#respMsg').removeAttr('style');
+			$('#respMsg').css({'background-color':'#D98162', 'color': '#ffffff'});
+			$('#respMsg').fadeIn(1000).delay(1000).fadeOut(500);
+			break;
+
+		case "let me in now" : 
+			$('#respMsg p').text("Don't be rude");
+			$('#respMsg').removeAttr('style');
+			$('#respMsg').css({'background-color':'#A65858'});
+			$('#respMsg').fadeIn(1000).delay(1000).fadeOut(500);
+			break;	
+
+		case "let me in please" : 
+			$('#respMsg p').text('Welcome');
+			$('#respMsg').removeAttr('style');
+			$('#respMsg').css({'background-color':'#888C65', 'color': '#174040'});
+			$('#respMsg').fadeIn(1000).delay(1000).fadeOut(500);
+			break;
+
+		default :
+			$('#respMsg p').text('Sorry, try again');
+			$('#respMsg').removeAttr('style');
+			$('#respMsg').css({'background-color':'#D9CA9C'});
+			$('#respMsg').fadeIn(1000).delay(1000).fadeOut(500);
+			break;
+			}
+	}	
+	
+	
+</script>	
+</body>
+</html>

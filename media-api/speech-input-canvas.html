@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chrome Webkit Speech Demo</title>
+<style type="text/css">
+body{
+	font-family:Tahoma, Geneva, sans-serif;	
+}
+h1{
+	font-size;14px;	
+}
+#msg{
+}
+#myCanvas{
+	border:1px solid #999;	
+	background-image:url(../images/20px-grid-sq.png);
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
+</script>
+</head>
+<body>
+<div id="container">
+  <h1>Speak to the Machine</h1>
+
+  	<p id="msg"></p>
+
+
+  <canvas id="myCanvas" width="800" height="600"></canvas>
+</div>
+<script>
+
+	window.SpeechRecognition = window.SpeechRecognition       ||
+                                 window.webkitSpeechRecognition ||
+                                 null;
+
+	if (window.SpeechRecognition === null) {	
+		$('#msg').text('Sorry No browser Support');
+      } else {
+        var recognizer = new window.SpeechRecognition();
+		
+        recognizer.continuous = true;
+		recognizer.interimResults = true;
+		recognizer.lang = "english";
+        recognizer.start();
+		
+		recognizer.onstart = function() { console.info('start');}
+  		recognizer.onerror = function(ev) { console.info('whoops'); }
+  		recognizer.onend = function() { console.info('I know its over'); }
+		recognizer.onresult = function(ev) {
+			console.info(ev.length);
+	   		console.info('hi');
+			for (var i = ev.resultIndex; i < ev.results.length; i++) {
+           	 if (ev.results[i].isFinal) {
+			  	var displayText = (ev.results[i][0].transcript);
+			  	displayText = displayText.trim();
+              	$('#msg').text(displayText);
+			  	console.info(displayText);
+			  	updateView(displayText);
+            } 
+          }
+	}
+	}
+
+
+
+//$(document).ready(function(){
+var myC = $('#myCanvas')[0].getContext("2d");
+var myCWidth = $('#myCanvas').width() - 100;
+var myCHeight = $('#myCanvas').height() - 100;
+var myX = 400;
+var myY = 300;
+var xSpeed = 0;
+var ySpeed = 0;
+
+function updateView(displayText){
+	
+		switch(displayText){
+			
+		case "move left" : 
+			xSpeed = -0.5;
+			ySpeed = 0;
+			$('#msg').text('xSpeed: ' + xSpeed);
+			break;
+
+		case "move right" : 
+			xSpeed = 0.5;
+			ySpeed = 0;
+			$('#msg').text('xSpeed: ' + xSpeed);
+			break;
+
+		case "go up" : 
+			xSpeed = 0;
+			ySpeed = -0.5;
+			$('#msg').text('ySpeed: ' + ySpeed);
+			break;
+			
+		case "go down" : 
+			xSpeed = 0;
+			ySpeed = 0.5;
+			$('#msg').text('ySpeed: ' + ySpeed);
+			break;
+			
+		case "stop" : 
+			xSpeed = 0;
+			ySpeed = 0;
+			$('#msg').text('Stopped');
+			break;
+
+		default :
+			$('#msg').html('Sorry, try again <em>'+ displayText + '</em> not recognised');
+			break;
+			}
+	}
+	
+	
+    window.requestAnimFrame = (function(){
+      return  window.requestAnimationFrame       || 
+              window.webkitRequestAnimationFrame || 
+              window.mozRequestAnimationFrame    || 
+              window.oRequestAnimationFrame      || 
+              window.msRequestAnimationFrame     || 
+              function( callback ){
+                window.setTimeout(callback, 1000 / 60);
+              };
+    })();	
+	
+(function draw(){	
+	myC.clearRect(0,0,800,600); // clear canvas  
+	myC.strokeStyle = "#000000";
+	myC.fillStyle = "#ffff00";
+	myC.lineWidth = 1;
+	myC.fillRect(myX,myY,100,100);
+	myC.strokeRect(myX,myY,100,100);
+	//console.info(xSpeed);
+	myX+=xSpeed;
+	myY+=ySpeed;
+	//console.info("myCWidth" + myCWidth);
+	if(myX > myCWidth || myX < 0){
+		/*xSpeed *= -1;*/
+		xSpeed = 0;
+	}
+	
+	if(myY > myCHeight || myY < 0){
+		/*ySpeed *= -1;*/
+		ySpeed = 0;
+	}
+	myX+=xSpeed;
+	myY+=ySpeed;
+	requestAnimFrame(draw);	
+})();
+	
+//});
+	
+</script>	
+</body>
+</html>
